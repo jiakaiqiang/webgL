@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+  <title>HELLO，AMAP!</title>
+  <style>
+    html,
+    body,
+    #container {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+  <div id="panel" style="width: 200px;
+  position: absolute;
+  right: 20px;
+  top: 20px;"></div>
+</body>
+<script>
+  window._AMapSecurityConfig = {
+    securityJsCode: '7be8abc4239dd0da14b122488ed969f7'
+  }
+</script>
+<script src="https://webapi.amap.com/loader.js"></script>
+<script type="text/javascript">
+
+  AMapLoader.load({
+    key: "21115d0e2c25059930f3977f48ce3625",       // 申请好的Web端开发者Key，首次调用 load 时必填
+    version: "2.0",
+    plugins: ['AMap.Driving', 'AMap.ToolBar','AMap.ToolBar','AMap.Scale','AMap.MapType','AMap.HawkEye']  ,
+    "AMapUI": {             // 是否加载 AMapUI，缺省不加载
+    "version": '1.1',   // AMapUI 版本
+    "plugins":['overlay/SimpleMarker'],       // 需要加载的 AMapUI ui插件
+  },             // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
+  }).then((AMap) => {
+    const map = new AMap.Map('container', { viewMode: "3D", center: [116.391935, 39.895534] });
+    const marker = new AMap.Marker({
+      position: [116.39, 39.9] //位置
+    })
+    //定义显示信息
+    let infoWindow = new AMap.InfoWindow({
+      anchor: 'top-left',
+      content: '我是一个弹窗信息'  //传入 dom 对象，或者 html 字符串
+    });
+    marker.on('click', (e) => {
+      infoWindow.open(map, [116.39, 39.9])
+    })
+    const lineArr = [
+      [116.368904, 39.913423],
+      [116.382122, 39.901176],
+      [116.387271, 39.912501],
+      [116.398258, 39.904600]
+    ];
+    const polyline = new AMap.Polyline({
+      path: lineArr,          // 设置线覆盖物路径
+      strokeColor: "#3366FF", // 线颜色
+      strokeWeight: 5,        // 线宽
+      strokeStyle: "solid",   // 线样式
+    });
+    map.add(polyline);
+
+    map.add(marker);
+    //或者多变形
+    const pathArr = [
+      [
+        [
+          [121.7789, 31.3102],
+          [121.7279, 31.3548],
+          [121.5723, 31.4361],
+          [121.5093, 31.4898],
+          [121.5624, 31.4864],
+          [121.5856, 31.4547],
+          [121.7694, 31.3907],
+          [121.796, 31.3456],
+          [121.7789, 31.3102],
+        ],
+      ],
+    ];
+    //添加控制类的插件
+    map.addControl(new AMap.ToolBar())
+    //使用放大缩小控件
+    map.addControl(new AMap.Scale())
+    const polygon = new AMap.Polygon({
+      path: pathArr,
+      fillColor: '#ccebc5', // 多边形填充颜色
+      strokeOpacity: 1, // 线条透明度
+      fillOpacity: 0.5, //填充透明度
+      strokeColor: '#2b8cbe', // 线条颜色
+      strokeWeight: 1, //线条宽度
+      strokeStyle: 'dashed', // 线样式
+      strokeDasharray: [5, 5], //轮廓的虚线和间隙的样式
+    })
+    polygon.on('mouseover', () => { // 鼠标移入更改样式
+      polygon.setOptions({
+        fillOpacity: 0.7,
+        fillColor: '#7bccc4'
+      })
+    })
+    polygon.on('mouseout', () => { // 鼠标移出恢复样式
+      polygon.setOptions({
+        fillOpacity: 0.5,
+        fillColor: '#ccebc5'
+      })
+    })
+    map.add(polygon)
+
+    // 路线绘制
+    let driving = new AMap.Driving({
+      map: map,
+      panel:"panel"
+    
+     
+    })
+    driving.search([
+      { keyword: '武功县北庄村', city: '咸阳' },
+      { keyword: '丈八一路(地铁站)', city: '西安' }
+    ], function (status, result) {
+      if (status === 'complete') {
+        console.log('绘制驾车路线完成')
+      } else {
+        console.log(status)
+        console.log('获取驾车数据失败：' + result)
+      }
+    })
+  }).catch((e) => {
+    console.error(e);  //加载错误提示
+  });   
+</script>
+
+</html>

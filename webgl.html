@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+
+
+    <script id="vertexShader" type="x-shader/x-vertex">
+    attribute vec4 a_Position;
+    void main(){
+        gl_Position = a_Position;
+        gl_PointSize = 50.0;
+    }
+</script>
+    <!-- 片元着色器  precision mediump float 说明精度-->
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        precision mediump float;
+    uniform vec4 u_FragColor;
+    void main() {
+        float dist = distance(gl_PointCoord, vec2(0.5, 0.5));
+        if(dist < 0.5) {
+            gl_FragColor = u_FragColor;
+        } else {
+            discard;
+        }
+    }
+</script>
+    <script src='./webgl.js'></script>>
+    <script>
+        //二分法
+        //存储点击的点位的位置
+        const g_points = [];
+        const canvas = document.getElementById('canvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const gl = canvas.getContext('webgl');
+        const vsSource = document.getElementById('vertexShader').innerText;
+        const fsSource = document.getElementById('fragmentShader').innerText;
+        initShaders(gl, vsSource, fsSource);
+        const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+        const u_FragColor=gl.getUniformLocation(gl.program,'u_FragColor');
+       
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        canvas.addEventListener('click', function (event) {
+            const { clientX, clientY } = event; //鼠标的位置
+            const { left, top, width, height } = canvas.getBoundingClientRect(); //画布的位置
+            const [cssX, cssY] = [  //鼠标位置画布的位置
+                clientX - left,
+                clientY - top
+            ];
+            const [halfWidth, halfHeight] = [width / 2, height / 2]; // 画布的中心点
+            const [xBaseCenter, yBaseCenter] = [cssX - halfWidth, cssY - halfHeight]; // 根据画布的中心点为webgl的坐标原点  计算出 鼠标位置的坐标
+            const yBaseCenterTop = -yBaseCenter; // 因为webgl 的坐标y轴方向和cancas 的方向不一致 因此取反
+            const [x, y] = [xBaseCenter / halfWidth, yBaseCenterTop / halfHeight];    //  计算出鼠标坐标webgl的比例
+            g_points.push({ x, y })
+            const color=new Float32Array([
+            Math.random(),
+            Math.random(),
+            Math.random(),
+            1.0
+            ])
+            const arr = new Float32Array([0.87, 0.91, 1, 1]);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+            gl.enable(gl.BLEND)
+            g_points.forEach(({ x, y }) => {
+                gl.vertexAttrib2f(a_Position, x, y);
+                gl.uniform4fv(u_FragColor,arr);
+                gl.drawArrays(gl.POINTS, 0, 1); //绘制鼠标的位置
+            })
+        })
+    </script>
+
+
+</body>
+
+</html>

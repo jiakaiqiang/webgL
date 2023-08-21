@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+<script id="vertexShader"
+    type="x-shader/x-vertex"> 
+    attribute vec4 a_Position;
+     void main(){ 
+        gl_Position = a_Position; 
+        gl_PointSize = 20.0; 
+    }
+ </script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+     void main(){ 
+        gl_FragColor=vec4(1.0,1.0,0.0,1.0); 
+    }
+     </script>
+     <script src="../webgl.js"></script>
+     <script src="./poly.js"></script>
+     <script src="./sky.js"></script>
+<script>
+     let canvas = document.getElementById("canvas");
+    let gl = canvas.getContext("webgl");
+    let vertexShaderSource = document.getElementById("vertexShader").innerText;
+    let fragmentShaderSource = document.getElementById("fragmentShader").innerText;
+
+   
+    //创建片元着色器对象
+    initShaders(gl, vertexShaderSource, fragmentShaderSource);
+ 
+    //获取顶点着色器中的变量a_Position
+   //夜空
+const sky=new Sky(gl)
+//当前正在绘制的多边形
+let poly=null
+
+//取消右击提示
+canvas.oncontextmenu = function(e){
+    e.default()
+    
+    return false;
+}
+// 鼠标点击事件
+canvas.addEventListener("mousedown", (event) => {
+    if(event.button===2){
+        popVertice()
+    }else{
+        const {x,y}=getMousePosInWebgl(event,canvas)
+        if(poly){
+            poly.addVertice(x,y)
+        }else{
+            crtPoly(x,y)
+        }
+    }
+    render()
+});
+//鼠标移动
+canvas.addEventListener("mousemove", (event) => {
+    if(poly){
+        const {x,y}=getMousePosInWebgl(event,canvas)
+        poly.setVertice(poly.count-1,x,y)
+        render()
+    }
+});
+
+//删除最后一个顶点
+function popVertice(){
+    poly.popVertice()
+    poly=null
+}
+//创建多边形
+function crtPoly(x,y){
+    poly=new Poly({
+        vertices:[x,y,x,y],
+        types:['POINTS','LINE_STRIP']
+    })
+    sky.add(poly)
+}
+// 渲染方法
+function render(){
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    sky.draw()
+    gl.clearColor(0, 0, 0, 1);
+}
+</script>
+</html>

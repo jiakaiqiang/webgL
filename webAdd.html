@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+</body>
+<script id="vertexShader" type="x-shader/x-vertex">
+    attribute vec4 a_Position;
+    uniform vec4 u_Test;
+    void main(){
+        gl_Position = a_Position + u_Test ;
+        
+    }
+        
+</script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+    void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+        
+</script>
+<script src="./webgl.js"></script>
+<script>
+const canvas  =  document.getElementById("canvas");
+const gl = canvas.getContext("webgl");
+
+const vertexShaderSourece =  document.getElementById("vertexShader").innerHTML;
+const fragmentShaderSourece =  document.getElementById("fragmentShader").innerHTML;
+initShaders(gl,vertexShaderSourece,fragmentShaderSourece);
+
+
+
+
+//定义缓存的数据
+const vertices=new Float32Array([
+        0,  0.1,
+        -0.1,-0.1,
+        0.1, -0.1
+    ])
+//创建缓存区
+const buffer =  gl.createBuffer()
+
+//绑定缓存区
+gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+//向缓存区写入数据
+gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+//获取属性
+let a_Position = gl.getAttribLocation(gl.program,"a_Position");
+//将数据写入属性
+gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,0,0);
+//启用属性
+gl.enableVertexAttribArray(a_Position);
+//获取uniform
+let u_test = gl.getUniformLocation(gl.program,"u_Test");
+
+
+gl.uniform4f(u_test,0,0.5,0,0);
+
+gl.clearColor(0, 0, 0, 1);
+gl.clear(gl.COLOR_BUFFER_BIT)
+//绘制
+gl.drawArrays(gl.TRIANGLES,0,3);
+let  y = 0;
+let ids =[]
+//自执行函数 让动起来
+;(function ani(){
+   y+=0.2;
+   if(y>1){
+    
+       y=-1;//重置到底
+
+   }
+   //重新设置添加的长度
+   gl.uniform4f(u_test,0,y,0,0);
+   gl.clear(gl.COLOR_BUFFER_BIT)
+   // 重新渲染
+   gl.drawArrays(gl.TRIANGLES,0,3);
+   let id = requestAnimationFrame(ani) //执行一个动画 添加到微任务里面下次宏任务执行前 调用该方法
+   ids.push(id)
+})()
+setTimeout(()=>{
+console.log(ids);
+ids.forEach(item=>{
+    cancelAnimationFrame(item)
+})
+},2000)
+
+</script>
+
+</html>

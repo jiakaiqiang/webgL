@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+<script id="vertexShader" type="x-shader/x-vertex">
+    attribute vec4 a_Position;
+    uniform vec4 u_Sin;
+    uniform vec4 u_Cos;
+    void main {
+        gl_Position.x =  a_Position.x * u_Sin +a_Position.y * u_Cos;
+        gl_Position.y =  a_Position.y * u_Cos +a_Position.x * u_Sin;
+        gl_Position.z =  a_Position.z;
+        gl_Position.w =  a_Position.w;
+    }
+ </script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+     void main(){ 
+        gl_FragColor=vec4(1.0,1.0,0.0,1.0); 
+    }
+     </script>
+<script src="./webgl.js"></script>
+<script>
+    let canvas = document.getElementById("canvas");
+    let gl = canvas.getContext("webgl");
+    let vertexShaderSource = document.getElementById("vertexShader").innerText;
+    let fragmentShaderSource = document.getElementById("fragmentShader").innerText;
+
+
+    //创建片元着色器对象
+    initShaders(gl, vertexShaderSource, fragmentShaderSource);
+     //创建顶点的数据
+     const points = [0,0.2,0.3,0.5]
+
+    //创建缓存区
+    const buffer =  gl.createBuffer();
+
+    //绑定缓存区
+    const 
+
+</script>
+
+</html>

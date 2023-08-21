@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+<script id="vertexShader"
+    type="x-shader/x-vertex"> 
+    attribute vec4 a_Position;
+     void main(){ 
+        gl_Position = a_Position; 
+        gl_PointSize = 20.0; 
+    }
+ </script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+     void main(){ 
+        gl_FragColor=vec4(1.0,1.0,0.0,1.0); 
+    }
+     </script>
+     <script src="../webgl.js"></script>
+     <script src="./poly.js"></script>
+<script>
+     let canvas = document.getElementById("canvas");
+    let gl = canvas.getContext("webgl");
+    let vertexShaderSource = document.getElementById("vertexShader").innerText;
+    let fragmentShaderSource = document.getElementById("fragmentShader").innerText;
+
+   
+    //创建片元着色器对象
+    initShaders(gl, vertexShaderSource, fragmentShaderSource);
+    //获取顶点着色器中的变量a_Position
+    const poly=new Poly({
+  gl,
+  types:['POINTS','LINE_STRIP']
+})
+
+gl.clearColor(0, 0, 0, 1);
+// 鼠标点击事件
+canvas.addEventListener("click", (event) => {
+    const {x,y}=getMousePosInWebgl(event,canvas)
+    poly.addVertice(x,y)
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    poly.draw()
+});
+</script>
+</html>
