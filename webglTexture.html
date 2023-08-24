@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+<script id="vertexShader" type="x-shader/x-vertex">
+   attribute vec4 a_Position;
+   attribute vec2 a_textCoord;
+   varying vec2 v_textCoord;
+   void main(){
+       gl_Position = a_Position;
+       v_textCoord = a_textCoord;
+   }
+
+</script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+    permutation vec4 gl_FragColor;
+    uniform sampler2D u_Sampler;
+    varying vec2 v_textCoord;
+    void main{
+        gl_FragColor =  texture2D(u_Sampler, v_textCoord);
+    }
+
+</script>
+<script src="./webgl.js"></script>
+<script>
+    //加载图片
+    function main (){
+        let image =new Image()
+        image.src = "./logo.png"
+        image.onload = function(){
+        render(image)
+        }
+    }
+    function setRectangle(gl, x, y, width, height) {
+  var x1 = x;
+  var x2 = x + width;
+  var y1 = y;
+  var y2 = y + height;
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+     x1, y1,
+     x2, y1,
+     x1, y2,
+     x1, y2,
+     x2, y1,
+     x2, y2,
+  ]), gl.STATIC_DRAW);
+}
+
+   function render(image){
+    const canvas = document.querySelector("#canvas");
+    const gl = canvas.getContext("webgl");
+    const vertexShader = document.querySelector("#vertexShader").innerHTML;
+    const fragmentShader = document.querySelector("#fragmentShader").innerHTML;
+
+    //初始化程序
+    initShaders(gl,vertexShader,fragmentShader);
+    let positionLocation =  gl.getAttribLocation(gl.program,'a_position')
+     let texCoordLocation  = gl.getAttribLocation(gl.program, "a_textCoord");
+     let positionBuffer = gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+setRectangle(gl, 0, 0, image.width, image.height);
+     let texCoordBuffer = gl.createBuffer();
+     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        0.0, 1.0,
+        1.0, 0.0,
+        1.0, 1.0,
+    ]),gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(texCoordLocation);
+    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+    //创建纹理
+    let texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE)
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST)
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST)
+
+    // 将图像上传到纹理
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+     gl.clearColor(0.0, 0.0, 0.0, 1.0);
+     gl.clear(gl.COLOR_BUFFER_BIT);
+     gl.enableVertexAttribArray(positionLocation);
+
+// Bind the position buffer.
+
+
+// Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+var size = 2;          // 2 components per iteration
+var type = gl.FLOAT;   // the data is 32bit floats
+var normalize = false; // don't normalize the data
+var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+var offset = 0;        // start at the beginning of the buffer
+gl.vertexAttribPointer(
+    positionLocation, size, type, normalize, stride, offset);
+
+
+// Tell the texcoord attribute how to get data out of texcoordBuffer (ARRAY_BUFFER)
+var size = 2;          // 2 components per iteration
+var type = gl.FLOAT;   // the data is 32bit floats
+var normalize = false; // don't normalize the data
+var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+var offset = 0;        // start at the beginning of the buffer
+gl.vertexAttribPointer(
+    texCoordLocation, size, type, normalize, stride, offset);
+
+// set the resolution
+
+
+// Draw the rectangle.
+var primitiveType = gl.TRIANGLES;
+var offset = 0;
+var count = 6;
+gl.drawArrays(primitiveType, offset, count);
+
+    }
+    main()
+</script>
+</html>

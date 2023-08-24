@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <button id="button">保存canvas</button>
+
+</body>
+<script>
+    let drawX = 0;
+    let drawY = 0;
+    let isDown = false;
+    //实现一个签名
+    //1.获取画布
+    var canvas = document.getElementById('canvas');
+    //设置画布的背景色
+    canvas.style.backgroundColor = 'black';
+    //2.获取画笔
+    var context = canvas.getContext('2d');
+    //3.设置画笔颜色
+    context.strokeStyle = 'red';
+    //4.设置画笔宽度
+    context.lineWidth = 2;
+    //5.开始画
+    function draw(beginx, beginy, endx, endy) {
+        context.beginPath();
+        context.moveTo(beginx, beginy);
+        context.lineTo(endx, endy);
+        context.stroke();
+    }
+    //监听鼠标按下事件
+    canvas.addEventListener('mousedown', (e) => {
+        console.log(e)
+        isDown = true;
+        // 获取鼠标的位置
+        drawX = e.x;
+        drawY = e.y;
+        context.beginPath();
+
+    }, false)
+    //监听鼠标移动的时间
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        draw(drawX, drawY, e.x, e.y);
+        //获取鼠标的位置
+        drawX = e.x;
+        drawY = e.y;
+        //画线
+
+    }, false)
+    //监听鼠标抬起事件
+    canvas.addEventListener('mouseup', (e) => {
+        isDown = false
+        context.closePath();
+    }, false)
+    document.getElementById('button').onclick = function () {
+        // 获取签名
+        let signature = canvas.toDataURL('image/svg ');
+
+        let link = document.createElement('a')
+        link.href = signature
+        link.download = '签1名'
+        link.click()
+        //移除标签
+        document.body.removeChild(link)
+
+    }
+
+</script>
+
+</html>

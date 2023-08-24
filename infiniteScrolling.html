@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        html,body{
+        margin:0;
+        padding:0
+        }
+      .ul{
+        height:400px;
+        width: 200px;
+        border:1px solid pink;
+        overflow:hidden;
+        position: relative;
+       
+        top:0;
+        
+
+      } 
+      li{
+        list-style-type: none;
+        width: 100px;
+      }
+      .one {
+        height:100px;
+        background:#ff0000;
+      }
+      .two {
+        height:100px;
+        background:#eeee00;
+      }
+      .third{
+      height:100px;
+      background:#efcccc;
+      }
+      .four{
+        height:100px;
+        background:#dddfff;
+      }
+    </style>
+</head>
+<body>
+    <div class="ul">
+        <ul  id="ul" style="position: absolute;
+        top:0px; margin:0px;">
+            <li class="one">1</li>
+            <li class="two">2</li>
+            <li class="third">3</li>
+            <li class="four">4</li>
+            <li class="one">1</li>
+            <li class="two">2</li>
+            <li class="third">3</li>
+            <li class="four">4</li>
+         </ul>
+    </div>
+</body>
+<script>
+    //实现无限滚动
+    //1.获取元素
+    var ul = document.getElementById('ul');
+ 
+    setInterval(function(){
+        console.log(ul.offsetTop)
+        if(ul.offsetTop== -400){
+            ul.style.top = '-100px'
+        }else{
+            ul.style.top = `${ul.offsetTop - 100}px`
+        }
+        
+    },2000)
+
+</script>
+</html>

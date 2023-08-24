@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+<canvas id="canvas"></canvas>
+</body>
+<script id="vertexShader" type="x-shader/x-vertex">
+    attribute vec4 a_Position; 
+    uniform vec4 u_Position;
+    void main(){
+        gl_Position = a_Position;
+        gl_PointSize = 10.0; 
+    }
+    </script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+
+    precision mediump float;
+ 
+    uniform sampler2D u_texture;
+     
+    void main() {
+       vec2 texcoord = vec2(0.5, 0.5);  
+       gl_FragColor = texture2D(u_texture, texcoord);
+    }
+    </script>
+<script>
+    let canvas = document.getElementById('canvas');
+
+    let gl = canvas.getContext('webgl');
+
+    //获取顶点着色器的源文件信息
+    let vertexShaderSource = document.getElementById('vertexShader').innerText;
+    let fragmentShaderSource = document.getElementById('fragmentShader').innerText;
+
+    //创建或者程序并加载着色器资源
+    createProgram(gl, vertexShaderSource, fragmentShaderSource);
+
+    //创建缓冲区-----程序取色的缓冲区
+    let buffer = gl.createBuffer();
+    //绑定缓冲区
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+    //创建缓冲区数据
+    let vertexs = new Float32Array([
+    0,0,
+    0.3,0,
+    0,0.2,
+    0.3,0.2,
+    0,0.2,
+    0.1,0.3
+    ])
+
+    //将数据写入缓冲区
+    gl.bufferData(gl.ARRAY_BUFFER, vertexs, gl.STATIC_DRAW);
+
+    //获取顶点着色器变量
+   let a_Position= gl.getAttribLocation(gl.program, 'a_Position');
+    //将缓冲区数据写入顶点着色器变量
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+    //启用顶点着色器变量
+    gl.enableVertexAttribArray(a_Position);
+ 
+
+    //创建纹理对象
+    var tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+var level = 0;
+var width = 2;
+var height = 1;
+var data = new Uint8Array([
+   255, 0, 0, 255,   // 一个红色的像素
+   0, 255, 0, 255,   // 一个绿色的像素
+]);
+gl.texImage2D(gl.TEXTURE_2D, level, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+var someSamplerLoc = gl.getUniformLocation(gl.program, "u_texture");
+
+var unit = 5;  // 挑选一个纹理单元
+gl.activeTexture(gl.TEXTURE0 + unit);
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.uniform1i(someSamplerLoc, unit);
+
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3); //绘制三个点-----组成的三角形
+
+
+    //创建着色器函数
+    function loadShader(gl, type, source) {
+        //创建着色器对象
+        let shader = gl.createShader(type);
+        //将着色器源文件信息加载到着色器对象中
+        gl.shaderSource(shader, source);
+        //编译着色器
+        gl.compileShader(shader);
+        //返回着色器对象
+        return shader;
+    }
+
+    // 创建着色器程序
+    function createProgram(gl, vertexShaderSource, fragmentShaderSource) {
+        //创建着色器程序
+        let program = gl.createProgram();
+        //将顶点着色器加载到着色器程序中
+        gl.attachShader(program, loadShader(gl, gl.VERTEX_SHADER, vertexShaderSource));
+        //将片元着色器加载到着色器程序中
+        gl.attachShader(program, loadShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource));
+        //链接着色器程序
+        gl.linkProgram(program);
+        //使用着色器程序
+        gl.useProgram(program);
+        gl.program = program
+        //返回着色器程序
+        return program;
+
+    }
+    </script>
+    </html>
